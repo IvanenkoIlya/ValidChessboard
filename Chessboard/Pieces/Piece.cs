@@ -8,7 +8,7 @@
         public Piece(int row, int col, char black)
         {
             Position = new Point(row, col);
-            Black = char.IsUpper(black);
+            Black = !char.IsUpper(black);
         }
 
         public abstract bool Attacks(Piece p);

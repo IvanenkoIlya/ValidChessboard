@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Chessboard.Pieces
 {
     public class Queen : Piece
     {
-        public Queen(int row, int col, char black) : base(row, col, black) { }
+        private List<Piece> blockedBy;
+
+        public Queen(int row, int col, char black) : base(row, col, black)
+        {
+            blockedBy = new List<Piece>();
+        }
 
         public override bool Attacks(Piece p)
         {
