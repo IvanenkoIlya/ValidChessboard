@@ -1,4 +1,7 @@
-﻿namespace Chessboard.Pieces
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Chessboard.Pieces
 {
     public class Knight : Piece
     {
@@ -28,6 +31,24 @@
             }
 
             return false;
+        }
+
+        public override List<Piece> Attacks(List<Piece> pieces)
+        {
+            List<Piece> attacked = new List<Piece>();
+
+            foreach (Piece p in pieces.Where(x => x.Black != Black))
+            {
+                if (Attacks(p))
+                    attacked.Add(p);
+            }
+
+            return attacked;
+        }
+
+        public override string ToString()
+        {
+            return $"Knight at ({Position.X},{Position.Y})";
         }
     }
 }

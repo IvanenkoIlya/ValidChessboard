@@ -39,16 +39,22 @@ namespace Chessboard
                             return;
                         }
 
-                        bool rowValid = int.TryParse(parts[1], out int row);
-                        bool colValid = int.TryParse(parts[2], out int col);
+                        if (parts[0].StartsWith("--"))
+                        {
+                            line = sr.ReadLine();
+                            continue;
+                        }
+
+                        bool rowValid = int.TryParse(parts[1], out int col);
+                        bool colValid = int.TryParse(parts[2], out int row);
 
                         if (!rowValid || !colValid)
                         {
                             Console.WriteLine($"\tError: Row or Column input is invalid: {line}");
-                            if (row < 1 || row > 8)
-                                Console.WriteLine($"\tError: Row ({row}) not in range 1-8");
                             if (col < 1 || col > 8)
-                                Console.WriteLine($"\tError: Column ({col}) not in range 1-8");
+                                Console.WriteLine($"\tError: Row ({col}) not in range 1-8");
+                            if (row < 1 || row > 8)
+                                Console.WriteLine($"\tError: Column ({row}) not in range 1-8");
                         }
 
                         Piece piece;
@@ -57,27 +63,27 @@ namespace Chessboard
                         {
                             case 'K':
                             case 'k':
-                                piece = new King(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new King(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             case 'Q':
                             case 'q':
-                                piece = new Queen(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new Queen(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             case 'B':
                             case 'b':
-                                piece = new Bishop(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new Bishop(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             case 'N':
                             case 'n':
-                                piece = new Knight(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new Knight(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             case 'R':
                             case 'r':
-                                piece = new Rook(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new Rook(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             case 'P':
                             case 'p':
-                                piece = new Pawn(row, int.Parse(parts[2]), parts[0][0]);
+                                piece = new Pawn(col, int.Parse(parts[2]), parts[0][0]);
                                 break;
                             default:
                                 Console.WriteLine($"\tError: Piece {parts[0]} is unknown in line {line}");
@@ -85,27 +91,35 @@ namespace Chessboard
                                 return;
                         }
 
-                        foreach(Piece p in Pieces)
-                        {
-                            if(p.Attacks(piece))
-                            {
-                                Console.WriteLine($"Invalid configuration: {p.GetType().Name} at ({p.Position.X},{p.Position.Y}) attacks {piece.GetType().Name} at ({piece.Position.X},{piece.Position.Y})");
-                                PrintBoard();
-                                Console.ReadLine();
-                                return;
-                            }
+                        //foreach(Piece p in Pieces)
+                        //{
+                        //    if(p.Attacks(piece))
+                        //    {
+                        //        Console.WriteLine($"Invalid configuration: {p.GetType().Name} at ({p.Position.X},{p.Position.Y}) attacks {piece.GetType().Name} at ({piece.Position.X},{piece.Position.Y})");
+                        //        PrintBoard();
+                        //        Console.ReadLine();
+                        //        return;
+                        //    }
 
-                            if (piece.Attacks(p))
-                            {
-                                Console.WriteLine($"Invalid configuration: {piece.GetType().Name} at ({piece.Position.X},{piece.Position.Y}) attacks {p.GetType().Name} at ({p.Position.X},{p.Position.Y})");
-                                PrintBoard();
-                                Console.ReadLine();
-                                return;
-                            }
-                        }
+                        //    if (piece.Attacks(p))
+                        //    {
+                        //        Console.WriteLine($"Invalid configuration: {piece.GetType().Name} at ({piece.Position.X},{piece.Position.Y}) attacks {p.GetType().Name} at ({p.Position.X},{p.Position.Y})");
+                        //        PrintBoard();
+                        //        Console.ReadLine();
+                        //        return;
+                        //    }
+                        //}
 
                         Pieces.Add(piece);
                         line = sr.ReadLine();
+                    }
+
+                    foreach(Piece p in Pieces)
+                    {
+                        foreach(Piece attacked in p.Attacks(Pieces))
+                        {
+                            Console.WriteLine($"{p} attacks {attacked}");
+                        }
                     }
 
                     PrintBoard();
@@ -134,7 +148,7 @@ namespace Chessboard
                         Console.BackgroundColor = whiteTile ? ConsoleColor.DarkGray : ConsoleColor.Black;
                     }
 
-                    Piece p = Pieces.FirstOrDefault(x => x.Position == new Point(i, j));
+                    Piece p = Pieces.FirstOrDefault(x => x.Position == new Point(j, i));
                     if(p != null)
                     {
                         char color = p.Black ? 'B' : 'W';

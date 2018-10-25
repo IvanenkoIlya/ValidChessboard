@@ -6,31 +6,63 @@ namespace Chessboard.Pieces
 {
     public class Bishop : Piece
     {
-        private List<Piece> blockedBy;
-
-        public Bishop(int row, int col, char black) : base(row, col, black)
-        {
-            blockedBy = new List<Piece>();
-        }
+        public Bishop(int row, int col, char black) : base(row, col, black) { }
 
         public override bool Attacks(Piece p)
         {
-            int distance = p.Position.X - Position.X;
+            if (p.Black == Black)
+                return false;
 
-            if (Math.Abs(distance) == Math.Abs(p.Position.Y - Position.Y))
+            return Math.Abs(p.Position.X - Position.X) == Math.Abs(p.Position.Y - Position.Y);
+        }
+
+        public override List<Piece> Attacks(List<Piece> pieces)
+        {
+            List<Piece> attacked = new List<Piece>();
+
+            // all pieces of the opposite color
+            foreach(Piece p in pieces.Where(x => x.Black != Black))
             {
-                if (p.Black == Black)
-                    blockedBy.Add(p);
-                else
+                int xDiff = p.Position.X - Position.X;
+                int yDiff = p.Position.Y - Position.Y;
+
+                // if diagonal
+                if( Math.Abs(xDiff) == Math.Abs(yDiff))
                 {
-                    if (distance < 0)
-                        return !blockedBy.Any(x => x.Position.X > p.Position.X && x.Position.X < Position.X);
-                    else
-                        return !blockedBy.Any(x => x.Position.X > Position.X && x.Position.X < p.Position.X);
+                    bool blocked = false;
+
+                    // all pieces of same color
+                    foreach(Piece sameColor in pieces.Where(x => x.Position != p.Position))
+                    {
+                        int xSameDiff = sameColor.Position.X - Position.X;
+                        int ySameDiff = sameColor.Position.Y - Position.Y;
+
+                        // if diagonal
+                        if(Math.Abs(xSameDiff) == Math.Abs(ySameDiff))
+                        {
+                            // check if on same diagonal as outer piece
+                            if((xDiff > 0 && xSameDiff > 0 && yDiff > 0 && ySameDiff > 0 && xDiff > xSameDiff) ||
+                            (xDiff > 0 && xSameDiff > 0 && yDiff < 0 && ySameDiff < 0 && xDiff > xSameDiff) ||
+                            (xDiff < 0 && xSameDiff < 0 && yDiff > 0 && ySameDiff > 0 && xDiff < xSameDiff) ||
+                            (xDiff < 0 && xSameDiff < 0 && yDiff < 0 && ySameDiff < 0 && xDiff < xSameDiff))
+                            {
+                                blocked = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!blocked)
+                        attacked.Add(p);
                 }
             }
 
-            return false;
+            return attacked;
+        }
+
+        public override string ToString()
+        {
+            return $"Bishop at ({Position.X},{Position.Y})";
         }
     }
 }

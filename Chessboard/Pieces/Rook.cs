@@ -5,42 +5,69 @@ namespace Chessboard.Pieces
 {
     public class Rook : Piece
     {
-        private List<Piece> blockedBy;
-
-        public Rook(int row, int col, char black) : base(row, col, black)
-        {
-            blockedBy = new List<Piece>();
-        }
+        public Rook(int row, int col, char black) : base(row, col, black) { }
 
         public override bool Attacks(Piece p)
         {
-            int xDiff = p.Position.X - Position.X;
-            int yDiff = p.Position.Y - Position.Y;
+            if (p.Black == Black)
+                return false;
 
-            if ( xDiff == 0 || yDiff == 0)
+            return (p.Position.X == Position.X) || (p.Position.Y == Position.Y);
+        }
+
+        public override List<Piece> Attacks(List<Piece> pieces)
+        {
+            List<Piece> attacked = new List<Piece>();
+
+            // different color pieces
+            foreach (Piece p in pieces.Where(x => x.Black != Black))
             {
-                if (p.Black == Black)
-                    blockedBy.Add(p);
-                else
+                int xDiff = p.Position.X - Position.X;
+                int yDiff = p.Position.Y - Position.Y;
+
+                if ((xDiff == 0 || yDiff == 0) && xDiff != yDiff)
                 {
-                    if(xDiff == 0)
+                    bool blocked = false;
+
+                    foreach( Piece sameColor in pieces.Where(x => x.Position != p.Position))
                     {
-                        if (yDiff < 0)
-                            return !blockedBy.Any(x => x.Position.Y > p.Position.Y && x.Position.Y < Position.Y);
-                        else
-                            return !blockedBy.Any(x => x.Position.Y > Position.Y && x.Position.Y < p.Position.Y);
+                        int xSameDiff = sameColor.Position.X - Position.X;
+                        int ySameDiff = sameColor.Position.Y - Position.Y;
+
+                        if(xSameDiff == 0 && ySameDiff == 0)
+                        {
+                            if (xDiff == 0 && xSameDiff == 0)
+                            {
+                                if ((yDiff > 0 && ySameDiff > 0 && yDiff > ySameDiff) ||
+                                   (yDiff < 0 && ySameDiff < 0 && yDiff < ySameDiff))
+                                {
+                                    blocked = true;
+                                    break;
+                                }
+                            }
+                            else if (yDiff == 0 && ySameDiff == 0)
+                            {
+                                if ((xDiff > 0 && xSameDiff > 0 && xDiff > xSameDiff) ||
+                                   (xDiff < 0 && xSameDiff < 0 && xDiff < xSameDiff))
+                                {
+                                    blocked = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        if (xDiff < 0)
-                            return !blockedBy.Any(x => x.Position.X > p.Position.X && x.Position.X < Position.X);
-                        else
-                            return !blockedBy.Any(x => x.Position.X > Position.X && x.Position.X < p.Position.X);
-                    }
+
+                    if (!blocked)
+                        attacked.Add(p);
                 }
             }
 
-            return false;
+            return attacked;
+        }
+
+        public override string ToString()
+        {
+            return $"Rook at ({Position.Y},{Position.X})";
         }
     }
 }
